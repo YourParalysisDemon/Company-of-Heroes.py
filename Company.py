@@ -1,5 +1,6 @@
 import customtkinter
 import PIL
+import keyboard
 import pygame
 import webbrowser
 from PIL import Image
@@ -7,6 +8,7 @@ from pymem import *
 from pymem.process import *
 from pymem.ptypes import RemotePointer
 from subprocess import Popen
+from threading import Thread
 
 # The game were hacking
 mem = Pymem("RelicCOH")
@@ -19,9 +21,28 @@ ammo_offsets = [0x0, 0x26C]
 cap_offsets = [0x0, 0x4E8]
 
 
+# Are threads
+def multi_run_money():
+    new_thread = Thread(target=money_hack, daemon=True)
+    new_thread.start()
+
+
+def multi_run_gas():
+    new_thread = Thread(target=gas_hack, daemon=True)
+    new_thread.start()
+
+
+def multi_run_pop():
+    new_thread = Thread(target=cap_hack, daemon=True)
+    new_thread.start()
+
+
+def multi_run_ammo():
+    new_thread = Thread(target=ammo_hack, daemon=True)
+    new_thread.start()
+
+
 # Are functions
-
-
 def getpointeraddress(base, offsets):
     remote_pointer = RemotePointer(mem.process_handle, base)
     for offset in offsets:
@@ -33,38 +54,46 @@ def getpointeraddress(base, offsets):
 
 def money_hack():
     addr = getpointeraddress(module + 0x0061E810, Money_offsets)
-    if addr is not None:
+    while 1:
         try:
             mem.write_int(addr, 0x47960000)
         except pymem.exception.MemoryWriteError as e:
             print(f"Error writing memory: {e}")
+        if keyboard.is_pressed("F1"):
+            break
 
 
 def gas_hack():
     addr = getpointeraddress(module + 0x0061E810, gas_offsets)
-    if addr is not None:
+    while 1:
         try:
             mem.write_int(addr, 0x47960000)
         except pymem.exception.MemoryWriteError as e:
             print(f"Error writing memory: {e}")
+        if keyboard.is_pressed("F1"):
+            break
 
 
 def ammo_hack():
     addr = getpointeraddress(module + 0x0061E810, ammo_offsets)
-    if addr is not None:
+    while 1:
         try:
             mem.write_int(addr, 0x47960000)
         except pymem.exception.MemoryWriteError as e:
             print(f"Error writing memory: {e}")
+        if keyboard.is_pressed("F1"):
+            break
 
 
 def cap_hack():
     addr = getpointeraddress(module + 0x0061E810, cap_offsets)
-    if addr is not None:
+    while 1:
         try:
             mem.write_int(addr, 0x1)
         except pymem.exception.MemoryWriteError as e:
             print(f"Error writing memory: {e}")
+        if keyboard.is_pressed("F1"):
+            break
 
 
 def open_msn():
@@ -81,7 +110,7 @@ def open_paint():
 
 # ----- Menu music-----
 pygame.init()
-music = pygame.mixer_music.load("music/mod.mp3")
+pygame.mixer_music.load("music/mod.mp3")
 pygame.mixer_music.play(1)
 
 
@@ -103,30 +132,25 @@ class App(customtkinter.CTk):
         image = PIL.Image.open("back/back.jpg")
         background_image = customtkinter.CTkImage(image, size=(350, 380))
 
-        def bg_resizer(e):
-            if e.widget is app:
-                i = customtkinter.CTkImage(image, size=(e.width, e.height))
-                bg_lbl.configure(text="", image=i)
-
         # Create a bg label
         bg_lbl = customtkinter.CTkLabel(s, text="", image=background_image)
         bg_lbl.place(x=0, y=0)
         # Menu buttons
         s.button = customtkinter.CTkButton(s, text="Money", fg_color="black", bg_color="black", text_color="red",
-                                           hover_color="gray", command=money_hack)
+                                           hover_color="gray", command=multi_run_money)
         s.button.grid(row=0, column=0, padx=20, pady=10)
 
         s.button = customtkinter.CTkButton(s, text="Gas", fg_color="black", bg_color="black", text_color="red",
-                                           hover_color="gray", command=gas_hack)
+                                           hover_color="gray", command=multi_run_gas)
         s.button.grid(row=1, column=0, padx=20, pady=10)
 
         s.button = customtkinter.CTkButton(s, text="Ammo", fg_color="black", bg_color="black", text_color="red",
-                                           hover_color="gray", command=ammo_hack)
+                                           hover_color="gray", command=multi_run_ammo)
         s.button.grid(row=2, column=0, padx=20, pady=10)
 
         s.button = customtkinter.CTkButton(s, text="Population Cap", fg_color="black", bg_color="black",
                                            text_color="red",
-                                           hover_color="gray", command=cap_hack)
+                                           hover_color="gray", command=multi_run_pop)
         s.button.grid(row=3, column=0, padx=20, pady=10)
 
         s.button = customtkinter.CTkButton(s, text="Exit", fg_color="black", bg_color="black", text_color="red",
