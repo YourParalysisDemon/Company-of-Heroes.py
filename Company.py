@@ -19,6 +19,7 @@ Money_offsets = [0x0, 0X10, 0X24, 0X18, 0X264]
 gas_offsets = [0x0, 0x10, 0x30, 0x18, 0x268]
 ammo_offsets = [0x0, 0x26C]
 cap_offsets = [0x0, 0x4E8]
+command_offsets = [0X0, 0X274]
 
 
 # Are threads
@@ -54,9 +55,12 @@ def getpointeraddress(base, offsets):
 
 def money_hack():
     addr = getpointeraddress(module + 0x0061E810, Money_offsets)
+    addr2 = getpointeraddress(module + 0x0061E810, command_offsets)
+
     while 1:
         try:
             mem.write_int(addr, 0x47960000)
+            mem.write_int(addr2, 0x47960000)
         except pymem.exception.MemoryWriteError as e:
             print(f"Error writing memory: {e}")
         if keyboard.is_pressed("F1"):
